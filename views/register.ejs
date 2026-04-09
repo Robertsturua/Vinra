@@ -6,28 +6,37 @@
   <title>Venra Bank | Open an Account</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    :root { --primary: #4f46e5; --primary-hover: #4338ca; --bg-color: #ffffff; --surface: #f8fafc; --text-main: #0f172a; --text-muted: #64748b; --border: #e2e8f0; --danger: #ef4444; --danger-bg: #fef2f2; --font: 'Inter', sans-serif; }
+    :root { --primary: #4f46e5; --primary-hover: #4338ca; --text-main: #0f172a; --text-muted: #64748b; --border: #e2e8f0; --danger: #ef4444; --danger-bg: #fef2f2; --font: 'Inter', sans-serif; }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font); }
-    body { background-color: var(--bg-color); color: var(--text-main); display: flex; min-height: 100vh; overflow-x: hidden; }
+    
+    /* Full-screen dark premium background to perfectly match login */
+    body { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: var(--text-main); display: flex; min-height: 100vh; overflow-x: hidden; }
     
     .login-container { display: flex; width: 100%; min-height: 100vh; }
     
-    .brand-panel { flex: 1; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; padding: 60px; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; }
-    .brand-panel::before { content: ''; position: absolute; width: 600px; height: 600px; background: radial-gradient(circle, rgba(79, 70, 229, 0.15) 0%, rgba(0,0,0,0) 70%); top: -100px; left: -100px; border-radius: 50%; }
+    /* LEFT SIDE: Centered Logo and Text (Exact match to login) */
+    .brand-panel { flex: 1.2; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 60px; position: relative; }
     
-    .brand-logo { z-index: 1; }
-    .brand-logo img { height: 75px; object-fit: contain; } 
+    /* Background Glow Effect */
+    .bg-glow { position: absolute; width: 700px; height: 700px; background: radial-gradient(circle, rgba(79, 70, 229, 0.15) 0%, rgba(0,0,0,0) 70%); top: 50%; left: 50%; transform: translate(-50%, -50%); border-radius: 50%; pointer-events: none; }
     
-    .brand-messaging { z-index: 1; max-width: 480px; }
-    .brand-messaging h1 { font-size: 48px; font-weight: 700; line-height: 1.1; margin-bottom: 24px; letter-spacing: -1.5px; }
-    .brand-messaging p { font-size: 18px; color: #94a3b8; line-height: 1.5; }
+    .brand-logo { z-index: 10; margin-bottom: 32px; }
+    .brand-logo img { height: 130px; object-fit: contain; } 
     
-    .form-panel { flex: 1.2; display: flex; align-items: center; justify-content: center; padding: 40px; background: #ffffff; overflow-y: auto; }
-    .form-wrapper { width: 100%; max-width: 500px; padding: 20px 0; }
-    .form-wrapper h2 { font-size: 32px; font-weight: 700; letter-spacing: -1px; margin-bottom: 8px; }
-    .form-wrapper .subtitle { color: var(--text-muted); font-size: 15px; margin-bottom: 30px; }
+    .brand-messaging { z-index: 10; max-width: 480px; }
+    .brand-messaging h1 { font-size: 48px; font-weight: 800; line-height: 1.1; margin-bottom: 20px; letter-spacing: -1.5px; color: #ffffff; }
+    .brand-messaging p { font-size: 18px; color: #94a3b8; line-height: 1.5; font-weight: 400; }
     
-    .alert { background: var(--danger-bg); color: var(--danger); padding: 14px 16px; border-radius: 12px; font-size: 14px; font-weight: 500; margin-bottom: 24px; display: none; align-items: center; gap: 8px; border: 1px solid rgba(239, 68, 68, 0.2); }
+    /* RIGHT SIDE: Floating Login Card */
+    .form-panel { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px; }
+    
+    /* Slightly wider than login (500px) to accommodate the 2-column grid, but same exact styling */
+    .form-wrapper { background: #ffffff; width: 100%; max-width: 500px; padding: 48px 40px; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+    
+    .form-wrapper h2 { font-size: 28px; font-weight: 800; letter-spacing: -1px; margin-bottom: 8px; text-align: center; color: var(--text-main); }
+    .form-wrapper .subtitle { color: var(--text-muted); font-size: 15px; margin-bottom: 32px; text-align: center; }
+    
+    .alert { background: var(--danger-bg); color: var(--danger); padding: 14px 16px; border-radius: 12px; font-size: 14px; font-weight: 600; margin-bottom: 24px; display: none; align-items: center; justify-content: center; gap: 8px; border: 1px solid rgba(239, 68, 68, 0.2); text-align: center; }
     .alert.visible { display: flex; }
     
     .form-step { display: none; }
@@ -37,19 +46,23 @@
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
     .full-width { grid-column: 1 / -1; }
     
+    .input-group { margin-bottom: 16px; }
     .input-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text-main); margin-bottom: 8px; }
-    .input-group input { width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: 12px; font-size: 15px; font-family: var(--font); background: var(--surface); outline: none; transition: 0.2s;}
+    .input-group input { width: 100%; padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px; font-size: 15px; font-family: var(--font); background: #f8fafc; outline: none; transition: 0.2s;}
     .input-group input:focus { background: #ffffff; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1); }
     
     .btn-submit { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.2s; margin-top: 10px; }
-    .btn-submit:hover { background: var(--primary-hover); transform: translateY(-1px); }
-    .btn-secondary { background: var(--surface); color: var(--text-main); border: 1px solid var(--border); }
-    .btn-secondary:hover { background: #e2e8f0; }
+    .btn-submit:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3); }
+    
+    .btn-secondary { background: #f8fafc; color: var(--text-main); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: #e2e8f0; transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
     
     .button-group { display: flex; gap: 12px; margin-top: 10px; }
     .button-group button { flex: 1; margin-top: 0; }
     
-    .step-indicator { font-size: 12px; font-weight: 700; color: var(--primary); text-transform: uppercase; margin-bottom: 12px; display: inline-block; background: #e0e7ff; padding: 4px 12px; border-radius: 20px; }
+    .step-indicator-container { text-align: center; margin-bottom: 12px; }
+    .step-indicator { font-size: 12px; font-weight: 700; color: var(--primary); text-transform: uppercase; display: inline-block; background: #e0e7ff; padding: 4px 12px; border-radius: 20px; }
+    
     .form-footer { margin-top: 24px; text-align: center; font-size: 14px; color: var(--text-muted); }
     .form-footer a { color: var(--primary); font-weight: 600; text-decoration: none; }
 
@@ -63,9 +76,11 @@
 
     @media (max-width: 900px) {
       .login-container { flex-direction: column; }
-      .brand-panel { flex: none; padding: 40px 24px; min-height: auto; align-items: center; text-align: center; }
-      .brand-logo { margin-bottom: 20px; }
-      .form-panel { padding: 40px 24px; align-items: flex-start; }
+      .brand-panel { flex: none; padding: 60px 24px 20px 24px; }
+      .brand-logo img { height: 90px; }
+      .brand-messaging h1 { font-size: 36px; }
+      .form-panel { padding: 20px 24px 60px 24px; align-items: flex-start; }
+      .form-wrapper { padding: 32px 24px; }
       .form-grid { grid-template-columns: 1fr; }
       .full-width { grid-column: auto; }
     }
@@ -80,7 +95,9 @@
   </div>
 
   <div class="login-container">
+    
     <div class="brand-panel">
+      <div class="bg-glow"></div>
       <div class="brand-logo">
         <img src="/logo.png" alt="Venra Bank">
       </div>
@@ -92,7 +109,9 @@
 
     <div class="form-panel">
       <div class="form-wrapper">
-        <div class="step-indicator" id="stepText">Step 1 of 2</div>
+        <div class="step-indicator-container">
+          <div class="step-indicator" id="stepText">Step 1 of 2</div>
+        </div>
         <h2>Create an account</h2>
         <div class="subtitle" id="subtitleText">Let's set up your login credentials.</div>
 
