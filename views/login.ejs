@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Venra Bank | Secure Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root { --primary: #4f46e5; --primary-hover: #4338ca; --text-main: #0f172a; --text-muted: #64748b; --border: #e2e8f0; --danger: #ef4444; --danger-bg: #fef2f2; --font: 'Inter', sans-serif; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font); }
+    
+    /* Full-screen dark premium background */
+    body { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: var(--text-main); display: flex; min-height: 100vh; overflow-x: hidden; }
+    
+    .login-container { display: flex; width: 100%; min-height: 100vh; }
+    
+    /* LEFT SIDE: Centered Logo and Text */
+    .brand-panel { flex: 1.2; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 60px; position: relative; }
+    
+    /* Background Glow Effect */
+    .bg-glow { position: absolute; width: 700px; height: 700px; background: radial-gradient(circle, rgba(79, 70, 229, 0.15) 0%, rgba(0,0,0,0) 70%); top: 50%; left: 50%; transform: translate(-50%, -50%); border-radius: 50%; pointer-events: none; }
+    
+    /* INCREASED: Even larger, more prominent logo */
+    .brand-logo { z-index: 10; margin-bottom: 32px; }
+    .brand-logo img { height: 130px; object-fit: contain; }
+    
+    .brand-messaging { z-index: 10; max-width: 480px; }
+    .brand-messaging h1 { font-size: 48px; font-weight: 800; line-height: 1.1; margin-bottom: 20px; letter-spacing: -1.5px; color: #ffffff; }
+    .brand-messaging p { font-size: 18px; color: #94a3b8; line-height: 1.5; font-weight: 400; }
+
+    /* RIGHT SIDE: Floating Login Card */
+    .form-panel { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px; }
+    
+    .form-wrapper { background: #ffffff; width: 100%; max-width: 420px; padding: 48px 40px; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+    .form-wrapper h2 { font-size: 28px; font-weight: 800; letter-spacing: -1px; margin-bottom: 8px; text-align: center; color: var(--text-main); }
+    .form-wrapper p { color: var(--text-muted); font-size: 15px; margin-bottom: 32px; text-align: center; }
+
+    .alert { background: var(--danger-bg); color: var(--danger); padding: 14px 16px; border-radius: 12px; font-size: 14px; font-weight: 600; margin-bottom: 24px; border: 1px solid rgba(239, 68, 68, 0.2); text-align: center; }
+
+    .input-group { margin-bottom: 20px; }
+    .input-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text-main); margin-bottom: 8px; }
+    .input-group input { width: 100%; padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px; font-size: 15px; font-family: var(--font); background: #f8fafc; outline: none; transition: 0.2s;}
+    .input-group input:focus { background: #ffffff; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1); }
+
+    .btn-submit { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.2s; margin-top: 10px; }
+    .btn-submit:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3); }
+
+    .form-footer { margin-top: 24px; text-align: center; font-size: 14px; color: var(--text-muted); }
+    .form-footer a { color: var(--primary); font-weight: 600; text-decoration: none; }
+
+    @media (max-width: 900px) {
+      .login-container { flex-direction: column; }
+      .brand-panel { flex: none; padding: 60px 24px 20px 24px; }
+      /* INCREASED: Mobile logo size bumped up too */
+      .brand-logo img { height: 90px; }
+      .brand-messaging h1 { font-size: 36px; }
+      .form-panel { padding: 20px 24px 60px 24px; align-items: flex-start; }
+      .form-wrapper { padding: 32px 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    
+    <div class="brand-panel">
+      <div class="bg-glow"></div>
+      <div class="brand-logo">
+        <img src="/logo.png" alt="Venra Bank">
+      </div>
+      <div class="brand-messaging">
+        <h1>Welcome back.</h1>
+        <p>Access your global accounts, manage international transactions, and track your high-yield savings securely.</p>
+      </div>
+    </div>
+    
+    <div class="form-panel">
+      <div class="form-wrapper">
+        <h2>Log In</h2>
+        <p>Enter your details to access your dashboard.</p>
+        
+        <% if (error) { %>
+          <div class="alert"><%= error %></div>
+        <% } %>
+
+        <form method="post" action="/login">
+          <div class="input-group">
+            <label>Username</label>
+            <input type="text" name="username" required autofocus />
+          </div>
+          <div class="input-group">
+            <label>Password</label>
+            <input type="password" name="password" required />
+          </div>
+          <button type="submit" class="btn-submit">Secure Log In</button>
+        </form>
+        
+        <div class="form-footer">
+          Don't have an account? <a href="/register">Apply here</a>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+</body>
+</html>

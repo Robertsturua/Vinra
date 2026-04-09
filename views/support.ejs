@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Venra Bank | Support</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root { --primary: #4f46e5; --primary-hover: #4338ca; --bg-color: #f8fafc; --surface: #ffffff; --text-main: #0f172a; --text-muted: #64748b; --border: #e2e8f0; --danger: #ef4444; --font: 'Inter', sans-serif; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font); }
+    body { background-color: var(--bg-color); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
+
+    /* DARK SIDEBAR STYLES */
+    .mobile-header { display: none; padding: 16px 20px; background: #0f172a; color: white; align-items: center; justify-content: space-between; }
+    .mobile-header img { height: 35px; object-fit: contain; }
+    .menu-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: white; }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); z-index: 99; backdrop-filter: blur(2px); }
+
+    .sidebar { width: 260px; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; display: flex; flex-direction: column; padding: 24px 20px; z-index: 100; box-shadow: 4px 0 15px rgba(0,0,0,0.05); }
+    .brand { display: flex; align-items: center; justify-content: center; margin-bottom: 40px; padding: 0 10px; }
+    .brand img { height: 75px; object-fit: contain; } 
+    
+    .nav-menu { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+    .nav-link { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px; color: #94a3b8; text-decoration: none; font-weight: 600; font-size: 14px; transition: all 0.2s; }
+    .nav-link:hover { background: rgba(255,255,255,0.05); color: white; }
+    .nav-link.active { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
+    
+    .user-profile { display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 12px; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.05); }
+    .avatar { width: 36px; height: 36px; background: linear-gradient(135deg, var(--primary), #818cf8); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; }
+    .user-info { display: flex; flex-direction: column; }
+    .user-info span { font-size: 13px; font-weight: 700; color: white; }
+    .user-info small { font-size: 11px; color: #94a3b8; }
+
+    /* PAGE SPECIFIC STYLES */
+    .main-content { flex: 1; overflow-y: auto; padding: 40px 60px; position: relative; }
+    .topbar { margin-bottom: 40px; }
+    .topbar h1 { font-size: 28px; font-weight: 800; letter-spacing: -1px; }
+
+    .support-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 1200px; align-items: stretch; }
+    .card { background: var(--surface); border-radius: 24px; padding: 32px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); display: flex; flex-direction: column; min-height: 280px; }
+    .card h3 { margin-bottom: 16px; font-size: 18px; border-bottom: 1px solid var(--border); padding-bottom: 16px; display: flex; align-items: center; gap: 10px; color: var(--text-main); }
+    .card p { font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 24px; flex: 1; }
+    .email-box { background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px dashed var(--border); font-family: monospace; font-size: 15px; font-weight: 700; color: var(--primary); text-align: center; }
+
+    .btn-chat-launch { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; transition: 0.2s; margin-top: auto; }
+    .btn-chat-launch:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3); }
+
+    .chat-btn { position: fixed; bottom: 40px; right: 40px; background: var(--primary); color: white; border: none; width: 60px; height: 60px; border-radius: 50%; font-size: 24px; cursor: pointer; box-shadow: 0 10px 25px rgba(79, 70, 229, 0.3); z-index: 1000; transition: 0.2s; }
+    .chat-btn:hover { transform: scale(1.05); background: var(--primary-hover); }
+    
+    .chat-window { position: fixed; bottom: 120px; right: 40px; width: 360px; height: 500px; background: var(--surface); border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.15); border: 1px solid var(--border); display: none; flex-direction: column; z-index: 1000; overflow: hidden; }
+    .chat-window.open { display: flex; animation: slideUp 0.3s ease; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    
+    .chat-header { background: var(--primary); color: white; padding: 16px 20px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; }
+    .close-chat { background: none; border: none; color: white; font-size: 20px; cursor: pointer; transition: 0.2s; opacity: 0.8; }
+    .close-chat:hover { opacity: 1; }
+    
+    .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; background: #f8fafc; }
+    .msg { padding: 10px 14px; border-radius: 16px; font-size: 13px; max-width: 85%; line-height: 1.4; }
+    .msg.user { background: var(--primary); color: white; align-self: flex-end; border-bottom-right-radius: 4px; box-shadow: 0 2px 4px rgba(79, 70, 229, 0.1); }
+    .msg.admin { background: #e2e8f0; color: var(--text-main); align-self: flex-start; border-bottom-left-radius: 4px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); }
+    
+    .chat-input { padding: 16px; border-top: 1px solid var(--border); display: flex; gap: 8px; background: var(--surface); }
+    .chat-input input { flex: 1; padding: 12px 16px; border: 1px solid var(--border); border-radius: 20px; outline: none; font-size: 13px; font-family: var(--font); transition: 0.2s; background: #f8fafc; }
+    .chat-input input:focus { border-color: var(--primary); background: white; }
+    .chat-input button { background: var(--primary); color: white; border: none; padding: 10px 16px; border-radius: 20px; font-weight: 600; cursor: pointer; font-size: 13px; transition: 0.2s; }
+    .chat-input button:hover { background: var(--primary-hover); }
+
+    @media (max-width: 1000px) {
+      .support-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 768px) {
+      body { flex-direction: column; }
+      .mobile-header { display: flex; }
+      .sidebar { position: fixed; left: -100%; top: 0; bottom: 0; transition: left 0.3s ease; width: 280px; }
+      .sidebar.open { left: 0; }
+      .sidebar-overlay.open { display: block; }
+      .main-content { padding: 20px; flex: 1; }
+      .support-grid { grid-template-columns: 1fr; }
+      .chat-window { width: 90%; right: 5%; bottom: 100px; height: 400px; }
+      .chat-btn { bottom: 20px; right: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="mobile-header">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <img src="/logo.png" alt="Venra Bank">
+    </div>
+    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+  </div>
+  <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="/logo.png" alt="Venra Bank">
+    </div>
+    <nav class="nav-menu">
+      <a href="/dashboard" class="nav-link">Home</a>
+      <a href="/send" class="nav-link">Send Money</a>
+      <a href="/receive" class="nav-link">Receive Money</a>
+      <a href="/transfers" class="nav-link">Transactions</a>
+      <a href="/hisa" class="nav-link">Savings Account</a>
+      <a href="/account" class="nav-link">Account Details</a>
+      <a href="/support" class="nav-link active">Support Hub</a>
+      <a href="/profile" class="nav-link">Settings</a>
+    </nav>
+    
+    <div style="margin-top: auto;">
+      <div class="user-profile">
+        <div class="avatar"><%= username.charAt(0).toUpperCase() %></div>
+        <div class="user-info"><span>@<%= username %></span><small><%= account.tier %> Plan</small></div>
+      </div>
+      <form action="/logout" method="POST">
+        <button type="submit" class="nav-link" style="width: 100%; background: transparent; border: none; cursor: pointer; color: #f87171; font-family: var(--font);">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-right: 12px;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          Log Out
+        </button>
+      </form>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="topbar">
+      <h1>Support & Compliance</h1>
+      <p style="color: var(--text-muted); margin-top: 8px;">We are here to assist you 24/7.</p>
+    </div>
+
+    <div class="support-grid">
+      <div class="card">
+        <h3><span style="font-size: 22px;">🎧</span> General Support</h3>
+        <p>For inquiries regarding account access, transfer limits, platform features, or general technical assistance, please reach out to our dedicated support team via email.</p>
+        <div class="email-box">support@venra.org</div>
+      </div>
+      
+      <div class="card" style="border-top: 4px solid #ef4444;">
+        <h3><span style="font-size: 22px;">⚖️</span> Security</h3>
+        <p>If your account is locked, or if you need to provide KYC/AML verification documents regarding a flagged transaction, contact the compliance department immediately.</p>
+        <div class="email-box" style="color: #ef4444; border-color: #fca5a5; background: #fef2f2;">compliance@venra.org</div>
+      </div>
+
+      <div class="card" style="border-top: 4px solid var(--primary); background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);">
+        <h3><span style="font-size: 22px;">💬</span> Live Assistance</h3>
+        <p>Connect instantly with a specialized representative. Our live chat team is available right now to securely assist you with active transfers, limits, and technical support.</p>
+        <button class="btn-chat-launch" onclick="toggleChat()">Start Live Chat Now</button>
+      </div>
+    </div>
+
+    <button class="chat-btn" onclick="toggleChat()">💬</button>
+    
+    <div class="chat-window" id="chatWindow">
+      <div class="chat-header">
+        <div>Live Support Agent</div>
+        <button class="close-chat" onclick="toggleChat()">×</button>
+      </div>
+      <div class="chat-messages" id="chatBox">
+        <div class="msg admin">Hello! How can we help you today?</div>
+      </div>
+      <div class="chat-input">
+        <input type="text" id="chatInput" placeholder="Type a message..." onkeypress="if(event.key === 'Enter') sendMessage()">
+        <button onclick="sendMessage()">Send</button>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    function toggleSidebar() {
+      document.querySelector('.sidebar').classList.toggle('open');
+      document.querySelector('.sidebar-overlay').classList.toggle('open');
+    }
+
+    function toggleChat() {
+      document.getElementById('chatWindow').classList.toggle('open');
+    }
+
+    async function loadMessages() {
+      const res = await fetch('/api/chat');
+      const msgs = await res.json();
+      const box = document.getElementById('chatBox');
+      
+      let isScrolledToBottom = box.scrollHeight - box.clientHeight <= box.scrollTop + 10;
+      
+      box.innerHTML = '<div class="msg admin">Hello! How can we help you today?</div>'; 
+      msgs.forEach(m => {
+        box.innerHTML += `<div class="msg ${m.sender}">${m.content}</div>`;
+      });
+
+      if (isScrolledToBottom) {
+        box.scrollTop = box.scrollHeight;
+      }
+    }
+
+    window.onload = () => {
+      loadMessages();
+      setInterval(loadMessages, 3000);
+    };
+
+    async function sendMessage() {
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text) return;
+      
+      input.value = '';
+      
+      const box = document.getElementById('chatBox');
+      box.innerHTML += `<div class="msg user">${text}</div>`;
+      box.scrollTop = box.scrollHeight;
+
+      await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: text })
+      });
+    }
+  </script>
+</body>
+</html>

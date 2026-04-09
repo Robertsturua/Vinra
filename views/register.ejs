@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Venra Bank | Open an Account</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root { --primary: #4f46e5; --primary-hover: #4338ca; --bg-color: #ffffff; --surface: #f8fafc; --text-main: #0f172a; --text-muted: #64748b; --border: #e2e8f0; --danger: #ef4444; --danger-bg: #fef2f2; --font: 'Inter', sans-serif; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font); }
+    body { background-color: var(--bg-color); color: var(--text-main); display: flex; min-height: 100vh; overflow-x: hidden; }
+    .login-container { display: flex; width: 100%; min-height: 100vh; }
+    .brand-panel { flex: 1; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; padding: 60px; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; }
+    .brand-panel::before { content: ''; position: absolute; width: 600px; height: 600px; background: radial-gradient(circle, rgba(79, 70, 229, 0.15) 0%, rgba(0,0,0,0) 70%); top: -100px; left: -100px; border-radius: 50%; }
+    
+    .brand-logo { z-index: 1; }
+    
+    .brand-messaging { z-index: 1; max-width: 480px; }
+    .brand-messaging h1 { font-size: 48px; font-weight: 700; line-height: 1.1; margin-bottom: 24px; letter-spacing: -1.5px; }
+    .brand-messaging p { font-size: 18px; color: #94a3b8; line-height: 1.5; }
+    .form-panel { flex: 1.2; display: flex; align-items: center; justify-content: center; padding: 40px; background: #ffffff; overflow-y: auto; }
+    .form-wrapper { width: 100%; max-width: 500px; padding: 20px 0; }
+    .form-wrapper h2 { font-size: 32px; font-weight: 700; letter-spacing: -1px; margin-bottom: 8px; }
+    .form-wrapper .subtitle { color: var(--text-muted); font-size: 15px; margin-bottom: 30px; }
+    .alert { background: var(--danger-bg); color: var(--danger); padding: 14px 16px; border-radius: 12px; font-size: 14px; font-weight: 500; margin-bottom: 24px; display: none; align-items: center; gap: 8px; border: 1px solid rgba(239, 68, 68, 0.2); }
+    .alert.visible { display: flex; }
+    .form-step { display: none; }
+    .form-step.active { display: block; animation: fadeIn 0.4s ease forwards; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+    .full-width { grid-column: 1 / -1; }
+    .input-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text-main); margin-bottom: 8px; }
+    .input-group input { width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: 12px; font-size: 15px; font-family: var(--font); background: var(--surface); outline: none; transition: 0.2s;}
+    .input-group input:focus { background: #ffffff; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1); }
+    .btn-submit { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.2s; margin-top: 10px; }
+    .btn-submit:hover { background: var(--primary-hover); transform: translateY(-1px); }
+    .btn-secondary { background: var(--surface); color: var(--text-main); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: #e2e8f0; }
+    .button-group { display: flex; gap: 12px; margin-top: 10px; }
+    .button-group button { flex: 1; margin-top: 0; }
+    .step-indicator { font-size: 12px; font-weight: 700; color: var(--primary); text-transform: uppercase; margin-bottom: 12px; display: inline-block; background: #e0e7ff; padding: 4px 12px; border-radius: 20px; }
+    .form-footer { margin-top: 24px; text-align: center; font-size: 14px; color: var(--text-muted); }
+    .form-footer a { color: var(--primary); font-weight: 600; text-decoration: none; }
+
+    /* LOADING OVERLAY CSS */
+    .loading-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.95); z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; color: white; backdrop-filter: blur(5px); }
+    .loading-overlay.active { display: flex; animation: fadeIn 0.3s ease; }
+    .spinner { width: 60px; height: 60px; border: 4px solid rgba(255,255,255,0.1); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 24px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: 20px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.5px; }
+    .loading-subtext { font-size: 14px; color: #94a3b8; font-family: monospace; }
+
+    @media (max-width: 900px) {
+      .login-container { flex-direction: column; }
+      .brand-panel { flex: none; padding: 40px 24px; min-height: auto; align-items: center; text-align: center; }
+      .brand-logo { margin-bottom: 20px; }
+      .form-panel { padding: 40px 24px; align-items: flex-start; }
+      .form-grid { grid-template-columns: 1fr; }
+      .full-width { grid-column: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text">Provisioning Secure Environment</div>
+    <div class="loading-subtext" id="loadingSubtext">Generating encrypted profiles...</div>
+  </div>
+
+  <div class="login-container">
+    <div class="brand-panel">
+      <div class="brand-logo">
+        <img src="/logo.png" alt="Venra Bank" style="height: 48px; object-fit: contain;">
+      </div>
+      <div class="brand-messaging">
+        <h1>Join the next generation of banking.</h1>
+        <p>Set up your secure financial dashboard in seconds.</p>
+      </div>
+    </div>
+
+    <div class="form-panel">
+      <div class="form-wrapper">
+        <div class="step-indicator" id="stepText">Step 1 of 2</div>
+        <h2>Create an account</h2>
+        <div class="subtitle" id="subtitleText">Let's set up your login credentials.</div>
+
+        <div class="alert" id="jsAlert"><span id="jsAlertText"></span></div>
+        <% if (error) { %><div class="alert visible"><span><%= error %></span></div><% } %>
+
+        <form method="post" action="/register" id="regForm">
+          <div class="form-step active" id="step1">
+            <div class="form-grid">
+              <div class="input-group full-width"><label>Choose a Username</label><input id="username" name="username" type="text" required /></div>
+              <div class="input-group"><label>Create Password</label><input id="password" name="password" type="password" required /></div>
+              <div class="input-group"><label>Confirm Password</label><input id="confirm_password" name="confirm_password" type="password" required /></div>
+            </div>
+            <button type="button" class="btn-submit" onclick="goToStep2()">Continue to Personal Details &rarr;</button>
+          </div>
+
+          <div class="form-step" id="step2">
+            <div class="form-grid">
+              <div class="input-group full-width"><label>Legal Full Name</label><input id="full_name" name="full_name" type="text" required/></div>
+              <div class="input-group"><label>Email Address</label><input id="email" name="email" type="email" required/></div>
+              <div class="input-group"><label>Phone Number</label><input id="phone" name="phone" type="tel" /></div>
+              <div class="input-group full-width"><label>Street Address</label><input id="street" name="street" type="text" /></div>
+              <div class="input-group"><label>City</label><input id="city" name="city" type="text" /></div>
+              <div class="input-group"><label>State / Province</label><input id="state" name="state" type="text" /></div>
+              <div class="input-group"><label>Postal / ZIP Code</label><input id="postal_code" name="postal_code" type="text" /></div>
+              <div class="input-group"><label>Country</label><input id="country" name="country" type="text" /></div>
+            </div>
+            <div class="button-group">
+              <button type="button" class="btn-submit btn-secondary" onclick="goToStep1()">&larr; Back</button>
+              <button type="submit" class="btn-submit">Complete Registration</button>
+            </div>
+          </div>
+        </form>
+
+        <div class="form-footer" id="footerText">Already have an account? <a href="/login">Log in here</a></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function showError(msg) { const a=document.getElementById('jsAlert'); document.getElementById('jsAlertText').innerText=msg; a.classList.add('visible'); }
+    function clearError() { document.getElementById('jsAlert').classList.remove('visible'); }
+    
+    function goToStep2() {
+      clearError();
+      const u=document.getElementById('username').value.trim(), p=document.getElementById('password').value, c=document.getElementById('confirm_password').value;
+      if (!u || !p || !c) return showError("Please fill out all fields.");
+      if (p !== c) return showError("Passwords do not match.");
+      if (p.length < 6) return showError("Password must be at least 6 characters.");
+      document.getElementById('step1').classList.remove('active'); document.getElementById('step2').classList.add('active');
+      document.getElementById('stepText').innerText = "Step 2 of 2"; document.getElementById('subtitleText').innerText = "Verify your identity."; document.getElementById('footerText').style.display = "none";
+    }
+    
+    function goToStep1() {
+      clearError();
+      document.getElementById('step2').classList.remove('active'); document.getElementById('step1').classList.add('active');
+      document.getElementById('stepText').innerText = "Step 1 of 2"; document.getElementById('subtitleText').innerText = "Let's set up your login credentials."; document.getElementById('footerText').style.display = "block";
+    }
+
+    document.getElementById('regForm').addEventListener('submit', function(e) {
+      e.preventDefault(); 
+      
+      const overlay = document.getElementById('loadingOverlay');
+      const subtext = document.getElementById('loadingSubtext');
+      
+      overlay.classList.add('active');
+
+      setTimeout(() => subtext.innerText = "Allocating secure Fiat and Crypto wallets...", 1000);
+      setTimeout(() => subtext.innerText = "Encrypting identity parameters...", 2500);
+      setTimeout(() => subtext.innerText = "Finalizing account setup...", 3500);
+      
+      setTimeout(() => {
+        this.submit();
+      }, 4500);
+    });
+  </script>
+</body>
+</html>

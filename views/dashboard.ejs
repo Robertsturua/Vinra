@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Venra Bank | Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root { --primary: #4f46e5; --primary-hover: #4338ca; --bg-color: #f8fafc; --surface: #ffffff; --text-main: #0f172a; --text-muted: #64748b; --border: #e2e8f0; --success: #10b981; --danger: #ef4444; --font: 'Inter', sans-serif; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font); }
+    body { background-color: var(--bg-color); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
+
+    /* --- NEW DARK SIDEBAR & HEADER STYLES --- */
+    .mobile-header { display: none; padding: 16px 20px; background: #0f172a; color: white; align-items: center; justify-content: space-between; }
+    .mobile-header img { height: 35px; object-fit: contain; }
+    .menu-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: white; }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); z-index: 99; backdrop-filter: blur(2px); }
+
+    .sidebar { width: 260px; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; display: flex; flex-direction: column; padding: 24px 20px; z-index: 100; box-shadow: 4px 0 15px rgba(0,0,0,0.05); }
+    .brand { display: flex; align-items: center; justify-content: center; margin-bottom: 40px; padding: 0 10px; }
+    
+    /* BIGGER LOGO */
+    .brand img { height: 75px; object-fit: contain; } 
+    
+    .nav-menu { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+    .nav-link { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px; color: #94a3b8; text-decoration: none; font-weight: 600; font-size: 14px; transition: all 0.2s; }
+    .nav-link:hover { background: rgba(255,255,255,0.05); color: white; }
+    .nav-link.active { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
+    
+    .user-profile { display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 12px; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.05); }
+    .avatar { width: 36px; height: 36px; background: linear-gradient(135deg, var(--primary), #818cf8); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; }
+    .user-info { display: flex; flex-direction: column; }
+    .user-info span { font-size: 13px; font-weight: 700; color: white; }
+    .user-info small { font-size: 11px; color: #94a3b8; }
+    /* ---------------------------------------- */
+
+    .main-content { flex: 1; overflow-y: auto; padding: 40px 60px; }
+    .topbar { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; }
+    .greeting h1 { font-size: 28px; font-weight: 800; letter-spacing: -1px; }
+    .greeting p { color: var(--text-muted); font-size: 15px; margin-top: 4px; }
+
+    .dashboard-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
+    .card { background: var(--surface); border-radius: 24px; padding: 32px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); }
+
+    .balance-card { background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); position: relative; overflow: hidden; }
+    .balance-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--primary); }
+    .balance-label { font-size: 14px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+    .balance-amount { font-size: 56px; font-weight: 800; letter-spacing: -2px; margin: 8px 0 24px 0; color: var(--text-main); word-break: break-all; }
+    
+    .quick-actions { display: flex; gap: 16px; flex-wrap: wrap; }
+    .action-btn { flex: 1; min-width: 90px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 20px 10px; background: #f1f5f9; border-radius: 16px; color: var(--text-main); text-decoration: none; font-weight: 600; font-size: 14px; transition: all 0.2s; border: 1px solid transparent; }
+    .action-btn:hover { background: #ffffff; border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); color: var(--primary); }
+    .action-icon { width: 40px; height: 40px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+
+    .hisa-card { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; position: relative; overflow: hidden; margin-bottom: 24px; box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3); border-radius: 20px; padding: 28px; }
+    .crypto-card { background: linear-gradient(135deg, #F7931A 0%, #d97706 100%); color: white; border: none; position: relative; overflow: hidden; margin-bottom: 24px; box-shadow: 0 10px 15px -3px rgba(247, 147, 26, 0.3); border-radius: 20px; padding: 28px; }
+    .crypto-card::after { content: '₿'; position: absolute; right: -10px; bottom: -20px; font-size: 100px; opacity: 0.15; line-height: 1; }
+    .eth-card { background: linear-gradient(135deg, #627EEA 0%, #3e5094 100%); color: white; border: none; position: relative; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(98, 126, 234, 0.3); border-radius: 20px; padding: 28px; }
+    .eth-card::after { content: '⟠'; position: absolute; right: -10px; bottom: -20px; font-size: 100px; opacity: 0.15; line-height: 1; }
+
+    .tx-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; margin-top: 40px; }
+    .tx-header h3 { font-size: 18px; font-weight: 700; }
+    .tx-header a { color: var(--primary); text-decoration: none; font-size: 14px; font-weight: 600; }
+    .tx-header a:hover { opacity: 0.8; }
+
+    .tx-list { display: flex; flex-direction: column; gap: 12px; }
+    .tx-item { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; transition: all 0.2s; }
+    .tx-item:hover { transform: translateX(4px); border-color: #cbd5e1; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+    .tx-left { display: flex; align-items: center; gap: 16px; }
+    .tx-icon { width: 48px; height: 48px; background: #f1f5f9; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;}
+    .tx-details h4 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+    .tx-details p { font-size: 13px; color: var(--text-muted); }
+    .tx-right { text-align: right; }
+    
+    .tx-amount { font-size: 15px; font-weight: 700; margin-bottom: 6px; transition: color 0.3s; }
+    .tx-amount.amt-pending { color: #a16207; } 
+    .tx-amount.amt-declined { color: #64748b; text-decoration: line-through; opacity: 0.6; } 
+    .tx-amount.amt-completed.incoming { color: #15803d; } 
+    .tx-amount.amt-completed.outgoing { color: var(--text-main); }
+    
+    .tx-status { font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block; }
+    .status-completed { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .status-pending { background: #fef08a; color: #a16207; border: 1px solid #fde047; }
+    .status-declined { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+
+    @media (max-width: 900px) {
+      body { flex-direction: column; }
+      .mobile-header { display: flex; }
+      .sidebar { position: fixed; left: -100%; top: 0; bottom: 0; transition: left 0.3s ease; width: 280px; }
+      .sidebar.open { left: 0; }
+      .sidebar-overlay.open { display: block; }
+      .main-content { padding: 20px; flex: 1; }
+      .dashboard-grid { grid-template-columns: 1fr; }
+      .balance-amount { font-size: 40px; }
+      .card { padding: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="mobile-header">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <img src="/logo.png" alt="Venra Bank">
+    </div>
+    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+  </div>
+  <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="/logo.png" alt="Venra Bank">
+    </div>
+    <nav class="nav-menu">
+      <a href="/dashboard" class="nav-link active">Home</a>
+      <a href="/send" class="nav-link">Send Money</a>
+      <a href="/receive" class="nav-link">Receive Money</a>
+      <a href="/transfers" class="nav-link">Transactions</a>
+      <a href="/hisa" class="nav-link">Savings Account</a>
+      <a href="/account" class="nav-link">Account Details</a>
+      <a href="/support" class="nav-link">Support Hub</a>
+      <a href="/profile" class="nav-link">Settings</a>
+    </nav>
+    
+    <div style="margin-top: auto;">
+      <div class="user-profile">
+        <div class="avatar"><%= username.charAt(0).toUpperCase() %></div>
+        <div class="user-info"><span>@<%= username %></span><small><%= account.tier %> Plan</small></div>
+      </div>
+      <form action="/logout" method="POST">
+        <button type="submit" class="nav-link" style="width: 100%; background: transparent; border: none; cursor: pointer; color: #ef4444; font-family: var(--font);">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-right: 12px;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          Log Out
+        </button>
+      </form>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="topbar">
+      <div class="greeting"><h1>Overview</h1><p>Here is what's happening with your money today.</p></div>
+    </div>
+    <div class="dashboard-grid">
+      <div>
+        <div class="card balance-card" style="margin-bottom: 24px;">
+          <div class="balance-label">Total EUR Balance</div>
+          <div class="balance-amount">€<%= fiatBalance.toLocaleString('en-US', {minimumFractionDigits: 2}) %></div>
+          <div class="quick-actions">
+            <a href="/send" class="action-btn"><div class="action-icon">↑</div>Send</a>
+            <a href="/receive" class="action-btn"><div class="action-icon">↓</div>Receive</a>
+            
+            <% if (account.btc_status === 'ACTIVE' || account.eth_status === 'ACTIVE' || account.hisa_status === 'ACTIVE') { %>
+              <a href="/hisa" class="action-btn"><div class="action-icon" style="background: var(--text-main);">⇄</div>Transfer</a>
+            <% } %>
+          </div>
+        </div>
+        <div class="tx-header"><h3>Recent Transactions</h3><a href="/transfers">View All →</a></div>
+        <div class="tx-list">
+          <% if (transactions.length === 0) { %>
+            <div style="text-align: center; padding: 30px; color: var(--text-muted); font-size: 14px; background: var(--surface); border-radius: 16px; border: 1px dashed var(--border);">
+              No recent activity. Once you make a transfer, it will appear here.
+            </div>
+          <% } else { %>
+            <% transactions.slice(0, 5).forEach(tx => { %>
+              <div class="tx-item">
+                <div class="tx-left">
+                  <div class="tx-icon"><%= tx.icon %></div>
+                  <div class="tx-details"><h4><%= tx.name %></h4><p><%= tx.date %></p></div>
+                </div>
+                <div class="tx-right">
+                  <div class="tx-amount amt-<%= tx.status.toLowerCase() %> <%= tx.direction.toLowerCase() %>">
+                    <%= tx.direction === 'INCOMING' ? '+' : '-' %><%= tx.amountStr %>
+                  </div>
+                  <div class="tx-status status-<%= tx.status.toLowerCase() %>"><%= tx.status %></div>
+                </div>
+              </div>
+            <% }) %>
+          <% } %>
+        </div>
+      </div>
+      <div>
+        <% if (account.hisa_status === 'ACTIVE') { %>
+        <div class="hisa-card" style="<%= account.hisa_tier === 'Premium' ? 'background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); box-shadow: 0 10px 15px -3px rgba(245, 158, 11, 0.3);' : '' %>">
+          <div class="balance-label" style="color: rgba(255,255,255,0.8);"><%= account.hisa_tier === 'Premium' ? 'Premium Savings' : 'Savings (HISA)' %></div>
+          <div class="balance-amount" style="color: white; font-size: 36px;">€<%= hisaBalance.toLocaleString('en-US', {minimumFractionDigits: 2}) %></div>
+        </div>
+        <% } %>
+
+        <% if (account.btc_status === 'ACTIVE') { %>
+        <div class="crypto-card">
+          <div class="balance-label" style="color: rgba(255,255,255,0.8);">Bitcoin</div>
+          <div class="balance-amount" style="color: white; font-size: 32px;"><%= btcBalance.toFixed(8) %></div>
+        </div>
+        <% } %>
+        
+        <% if (account.eth_status === 'ACTIVE') { %>
+        <div class="eth-card">
+          <div class="balance-label" style="color: rgba(255,255,255,0.8);">Ethereum</div>
+          <div class="balance-amount" style="color: white; font-size: 32px;"><%= ethBalance.toFixed(8) %></div>
+        </div>
+        <% } %>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    function toggleSidebar() {
+      document.querySelector('.sidebar').classList.toggle('open');
+      document.querySelector('.sidebar-overlay').classList.toggle('open');
+    }
+  </script>
+</body>
+</html>
