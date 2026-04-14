@@ -13,7 +13,6 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font); }
     body { background-color: var(--bg-color); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
 
-    /* --- NEW DARK SIDEBAR & HEADER STYLES --- */
     .mobile-header { display: none; padding: 16px 20px; background: #0f172a; color: white; align-items: center; justify-content: space-between; }
     .mobile-header img { height: 35px; object-fit: contain; }
     .menu-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: white; }
@@ -33,7 +32,6 @@
     .user-info { display: flex; flex-direction: column; }
     .user-info span { font-size: 13px; font-weight: 700; color: white; }
     .user-info small { font-size: 11px; color: #94a3b8; }
-    /* ---------------------------------------- */
 
     .main-content { flex: 1; overflow-y: auto; padding: 40px 60px; }
     .topbar { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; }
@@ -161,31 +159,54 @@
               No recent activity. Once you make a transfer, it will appear here.
             </div>
           <% } else { %>
-            <% transactions.slice(0, 5).forEach(tx => { 
-                 const isInternal = tx.detail === 'Internal Transfer';
+            <% 
+              /* EJS LOGIC: Split the transactions into two distinct lists */
+              const recentTxs = transactions.slice(0, 6); 
+              const regularTxs = recentTxs.filter(tx => tx.detail !== 'Internal Transfer');
+              const internalTxs = recentTxs.filter(tx => tx.detail === 'Internal Transfer');
             %>
-              <div class="tx-item" style="<%= isInternal ? 'background: #f8fafc; border: 1px dashed #cbd5e1; box-shadow: none;' : '' %>">
+
+            <% regularTxs.forEach(tx => { %>
+              <div class="tx-item">
                 <div class="tx-left">
-                  <div class="tx-icon" style="<%= isInternal ? 'background: #e0e7ff; color: #4f46e5;' : '' %>">
-                    <%= isInternal ? '⇄' : tx.icon %>
-                  </div>
-                  <div class="tx-details">
-                    <h4 style="<%= isInternal ? 'color: #475569;' : '' %>"><%= tx.name %></h4>
-                    <p><%= tx.date %> <%= isInternal ? '• Internal Route' : '' %></p>
-                  </div>
+                  <div class="tx-icon"><%= tx.icon %></div>
+                  <div class="tx-details"><h4><%= tx.name %></h4><p><%= tx.date %></p></div>
                 </div>
                 <div class="tx-right">
-                  <div class="tx-amount amt-<%= tx.status.toLowerCase() %> <%= tx.direction.toLowerCase() %>" style="<%= isInternal ? 'color: #475569; font-weight: 600;' : '' %>">
+                  <div class="tx-amount amt-<%= tx.status.toLowerCase() %> <%= tx.direction.toLowerCase() %>">
                     <%= tx.direction === 'INCOMING' ? '+' : '-' %><%= tx.amountStr %>
                   </div>
-                  <% if (isInternal) { %>
-                    <div class="tx-status" style="background: #e2e8f0; color: #475569; border: 1px solid #cbd5e1;">INTERNAL</div>
-                  <% } else { %>
-                    <div class="tx-status status-<%= tx.status.toLowerCase() %>"><%= tx.status %></div>
-                  <% } %>
+                  <div class="tx-status status-<%= tx.status.toLowerCase() %>"><%= tx.status %></div>
                 </div>
               </div>
             <% }) %>
+
+            <% if (internalTxs.length > 0) { %>
+              <div style="display: flex; align-items: center; margin: 16px 0 8px 0;">
+                <div style="flex: 1; height: 1px; background: var(--border);"></div>
+                <div style="padding: 0 12px; font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Internal Activity</div>
+                <div style="flex: 1; height: 1px; background: var(--border);"></div>
+              </div>
+
+              <% internalTxs.forEach(tx => { %>
+                <div class="tx-item" style="background: #f8fafc; border: 1px dashed #cbd5e1; box-shadow: none;">
+                  <div class="tx-left">
+                    <div class="tx-icon" style="background: #e0e7ff; color: #4f46e5;">⇄</div>
+                    <div class="tx-details">
+                      <h4 style="color: #475569;"><%= tx.name %></h4>
+                      <p><%= tx.date %> • Internal Route</p>
+                    </div>
+                  </div>
+                  <div class="tx-right">
+                    <div class="tx-amount amt-<%= tx.status.toLowerCase() %> <%= tx.direction.toLowerCase() %>" style="color: #475569; font-weight: 600;">
+                      <%= tx.direction === 'INCOMING' ? '+' : '-' %><%= tx.amountStr %>
+                    </div>
+                    <div class="tx-status" style="background: #e2e8f0; color: #475569; border: 1px solid #cbd5e1;">INTERNAL</div>
+                  </div>
+                </div>
+              <% }) %>
+            <% } %>
+
           <% } %>
         </div>
 
