@@ -21,7 +21,7 @@ app.use(session({ secret: 'super-secret-bank-key', resave: false, saveUninitiali
 // ==========================================
 let db;
 async function initDB() {
-    // NEW: If on Railway, use the permanent /data folder. If on your computer, use the normal folder.
+    // If on Railway, use the permanent /data folder. If on your computer, use the normal folder.
     const dbPath = process.env.RAILWAY_ENVIRONMENT ? '/data/shmuper.db' : './shmuper.db';
     
     db = await open({ filename: dbPath, driver: sqlite3.Database });
@@ -216,6 +216,11 @@ app.post('/send', requireAuth, async (req, res) => {
     const today = new Date().toLocaleDateString();
     const numAmount = parseFloat(amount);
 
+    // FAIL FAST: Ensure they typed a real number
+    if (isNaN(numAmount) || numAmount <= 0) {
+        return res.redirect('/send?error=Please enter a valid amount.');
+    }
+
     let dailyLimit = 10000;
     if (account.account_tier === 'Standard') dailyLimit = 50000;
     if (account.account_tier === 'Premium') dailyLimit = 100000;
@@ -227,25 +232,33 @@ app.post('/send', requireAuth, async (req, res) => {
 
     if (currency_type === 'btc' && account.btc_status === 'ACTIVE') {
         const sats = Math.round(numAmount * 100000000);
-        if (account.btc_sats >= sats && sats > 0) {
-            await db.run('UPDATE accounts SET btc_sats = btc_sats - ? WHERE user_id = ?', [sats, userId]);
-            await db.run('INSERT INTO transactions (user_id, name, direction, currency, amount, raw_amount, status, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [userId, 'Network Transfer', 'OUTGOING', 'BTC', `${numAmount} BTC`, numAmount, 'PENDING', today]);
-        }
+        
+        // FAIL FAST: Insufficient BTC
+        if (account.btc_sats < sats) return res.redirect('/send?error=Insufficient Bitcoin balance for this transfer.');
+        
+        await db.run('UPDATE accounts SET btc_sats = btc_sats - ? WHERE user_id = ?', [sats, userId]);
+        await db.run('INSERT INTO transactions (user_id, name, direction, currency, amount, raw_amount, status, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [userId, 'Network Transfer', 'OUTGOING', 'BTC', `${numAmount} BTC`, numAmount, 'PENDING', today]);
+        
     } else if (currency_type === 'eth' && account.eth_status === 'ACTIVE') {
         const sats = Math.round(numAmount * 100000000);
-        if (account.eth_sats >= sats && sats > 0) {
-            await db.run('UPDATE accounts SET eth_sats = eth_sats - ? WHERE user_id = ?', [sats, userId]);
-            await db.run('INSERT INTO transactions (user_id, name, direction, currency, amount, raw_amount, status, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [userId, 'Network Transfer', 'OUTGOING', 'ETH', `${numAmount} ETH`, numAmount, 'PENDING', today]);
-        }
+        
+        // FAIL FAST: Insufficient ETH
+        if (account.eth_sats < sats) return res.redirect('/send?error=Insufficient Ethereum balance for this transfer.');
+        
+        await db.run('UPDATE accounts SET eth_sats = eth_sats - ? WHERE user_id = ?', [sats, userId]);
+        await db.run('INSERT INTO transactions (user_id, name, direction, currency, amount, raw_amount, status, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [userId, 'Network Transfer', 'OUTGOING', 'ETH', `${numAmount} ETH`, numAmount, 'PENDING', today]);
+        
     } else if (currency_type === 'eur') {
-        if ((sentToday + numAmount) > dailyLimit) {
-            return res.redirect(`/send?error=Daily transfer limit of €${dailyLimit.toLocaleString()} exceeded. Please request a tier upgrade.`);
-        }
         const cents = Math.round(numAmount * 100);
-        if (account.fiat_cents >= cents && cents > 0) {
-            await db.run('UPDATE accounts SET fiat_cents = fiat_cents - ? WHERE user_id = ?', [cents, userId]);
-            await db.run('INSERT INTO transactions (user_id, name, direction, currency, amount, raw_amount, status, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [userId, recipient_name || 'Bank Transfer', 'OUTGOING', 'EUR', `${numAmount.toLocaleString('en-US', {minimumFractionDigits: 2})} EUR`, numAmount, 'PENDING', today]);
-        }
+        
+        // FAIL FAST: Insufficient EUR
+        if (account.fiat_cents < cents) return res.redirect('/send?error=Insufficient EUR balance for this transfer.');
+        
+        // FAIL FAST: Daily Limit
+        if ((sentToday + numAmount) > dailyLimit) return res.redirect(`/send?error=Daily transfer limit of €${dailyLimit.toLocaleString()} exceeded. Please request a tier upgrade.`);
+        
+        await db.run('UPDATE accounts SET fiat_cents = fiat_cents - ? WHERE user_id = ?', [cents, userId]);
+        await db.run('INSERT INTO transactions (user_id, name, direction, currency, amount, raw_amount, status, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [userId, recipient_name || 'Bank Transfer', 'OUTGOING', 'EUR', `${numAmount.toLocaleString('en-US', {minimumFractionDigits: 2})} EUR`, numAmount, 'PENDING', today]);
     }
     res.redirect('/transfers');
 });
