@@ -184,7 +184,12 @@
         <% if (account.hisa_status === 'ACTIVE') { %>
         <div class="hisa-card" style="<%= account.hisa_tier === 'Premium' ? 'background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); box-shadow: 0 10px 15px -3px rgba(245, 158, 11, 0.3);' : '' %>">
           <div class="balance-label" style="color: rgba(255,255,255,0.8);"><%= account.hisa_tier === 'Premium' ? 'Premium Savings' : 'Savings (HISA)' %></div>
-          <div class="balance-amount" style="color: white; font-size: 36px;">€<%= hisaBalance.toLocaleString('en-US', {minimumFractionDigits: 2}) %></div>
+          <div class="balance-amount" style="color: white; font-size: 36px; margin-bottom: 12px;">€<%= hisaBalance.toLocaleString('en-US', {minimumFractionDigits: 2}) %></div>
+          
+          <div style="display: inline-block; background: rgba(255, 255, 255, 0.25); padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; color: white;">
+            Current Yield: <%= account.hisa_tier === 'Premium' ? '12.5%' : '9.5%' %> APY
+          </div>
+
         </div>
         <% } %>
 
