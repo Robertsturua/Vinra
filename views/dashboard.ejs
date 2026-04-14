@@ -140,6 +140,7 @@
       </div>
     </div>
     <div class="dashboard-grid">
+      
       <div>
         <div class="card balance-card" style="margin-bottom: 24px;">
           <div class="balance-label">Total EUR Balance</div>
@@ -159,59 +160,41 @@
               No recent activity. Once you make a transfer, it will appear here.
             </div>
           <% } else { %>
-            <% 
-              /* EJS LOGIC: Split the transactions into two distinct lists */
-              const recentTxs = transactions.slice(0, 6); 
-              const regularTxs = recentTxs.filter(tx => tx.detail !== 'Internal Transfer');
-              const internalTxs = recentTxs.filter(tx => tx.detail === 'Internal Transfer');
+            <% transactions.slice(0, 5).forEach(tx => { 
+                 const isInternal = tx.detail === 'Internal Transfer';
             %>
-
-            <% regularTxs.forEach(tx => { %>
-              <div class="tx-item">
+              <div class="tx-item" style="<%= isInternal ? 'background: #f8fafc; border: 1px dashed #cbd5e1; box-shadow: none;' : '' %>">
                 <div class="tx-left">
-                  <div class="tx-icon"><%= tx.icon %></div>
-                  <div class="tx-details"><h4><%= tx.name %></h4><p><%= tx.date %></p></div>
+                  <div class="tx-icon" style="<%= isInternal ? 'background: #e0e7ff; color: #4f46e5;' : '' %>">
+                    <%= isInternal ? '⇄' : tx.icon %>
+                  </div>
+                  <div class="tx-details">
+                    <h4 style="<%= isInternal ? 'color: #475569;' : '' %>"><%= tx.name %></h4>
+                    <p><%= tx.date %> <%= isInternal ? '• Internal Route' : '' %></p>
+                  </div>
                 </div>
                 <div class="tx-right">
-                  <div class="tx-amount amt-<%= tx.status.toLowerCase() %> <%= tx.direction.toLowerCase() %>">
+                  <div class="tx-amount amt-<%= tx.status.toLowerCase() %> <%= tx.direction.toLowerCase() %>" style="<%= isInternal ? 'color: #475569; font-weight: 600;' : '' %>">
                     <%= tx.direction === 'INCOMING' ? '+' : '-' %><%= tx.amountStr %>
                   </div>
-                  <div class="tx-status status-<%= tx.status.toLowerCase() %>"><%= tx.status %></div>
+                  <% if (isInternal) { %>
+                    <div class="tx-status" style="background: #e2e8f0; color: #475569; border: 1px solid #cbd5e1;">INTERNAL</div>
+                  <% } else { %>
+                    <div class="tx-status status-<%= tx.status.toLowerCase() %>"><%= tx.status %></div>
+                  <% } %>
                 </div>
               </div>
             <% }) %>
-
-            <% if (internalTxs.length > 0) { %>
-              <div style="display: flex; align-items: center; margin: 16px 0 8px 0;">
-                <div style="flex: 1; height: 1px; background: var(--border);"></div>
-                <div style="padding: 0 12px; font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Internal Activity</div>
-                <div style="flex: 1; height: 1px; background: var(--border);"></div>
-              </div>
-
-              <% internalTxs.forEach(tx => { %>
-                <div class="tx-item" style="background: #f8fafc; border: 1px dashed #cbd5e1; box-shadow: none;">
-                  <div class="tx-left">
-                    <div class="tx-icon" style="background: #e0e7ff; color: #4f46e5;">⇄</div>
-                    <div class="tx-details">
-                      <h4 style="color: #475569;"><%= tx.name %></h4>
-                      <p><%= tx.date %> • Internal Route</p>
-                    </div>
-                  </div>
-                  <div class="tx-right">
-                    <div class="tx-amount amt-<%= tx.status.toLowerCase() %> <%= tx.direction.toLowerCase() %>" style="color: #475569; font-weight: 600;">
-                      <%= tx.direction === 'INCOMING' ? '+' : '-' %><%= tx.amountStr %>
-                    </div>
-                    <div class="tx-status" style="background: #e2e8f0; color: #475569; border: 1px solid #cbd5e1;">INTERNAL</div>
-                  </div>
-                </div>
-              <% }) %>
-            <% } %>
-
           <% } %>
         </div>
-
       </div>
+
       <div>
+        
+        <div class="tx-header" style="margin-top: 0; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 2px solid var(--border);">
+          <h3 style="color: var(--text-muted); text-transform: uppercase; font-size: 13px; letter-spacing: 1px;">Wealth & Assets</h3>
+        </div>
+
         <% if (account.hisa_status === 'ACTIVE') { %>
         <div class="hisa-card" style="<%= account.hisa_tier === 'Premium' ? 'background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); box-shadow: 0 10px 15px -3px rgba(245, 158, 11, 0.3);' : '' %>">
           <div class="balance-label" style="color: rgba(255,255,255,0.8);"><%= account.hisa_tier === 'Premium' ? 'Premium Savings' : 'Savings (HISA)' %></div>
@@ -244,6 +227,7 @@
         </div>
         <% } %>
       </div>
+
     </div>
   </main>
 
