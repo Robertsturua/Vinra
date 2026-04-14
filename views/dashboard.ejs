@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Venra Bank | Dashboard</title>
-<link rel="manifest" href="/manifest.json" />
+  <link rel="manifest" href="/manifest.json" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -147,14 +147,12 @@
         <div class="card balance-card" style="margin-bottom: 24px;">
           <div class="balance-label">Total EUR Balance</div>
           <div class="balance-amount">€<%= fiatBalance.toLocaleString('en-US', {minimumFractionDigits: 2}) %></div>
+          
           <div class="quick-actions">
             <a href="/send" class="action-btn"><div class="action-icon">↑</div>Send</a>
             <a href="/receive" class="action-btn"><div class="action-icon">↓</div>Receive</a>
-            
-            <% if (account.btc_status === 'ACTIVE' || account.eth_status === 'ACTIVE' || account.hisa_status === 'ACTIVE') { %>
-              <a href="/hisa" class="action-btn"><div class="action-icon" style="background: var(--text-main);">⇄</div>Transfer</a>
-            <% } %>
           </div>
+
         </div>
         <div class="tx-header"><h3>Recent Transactions</h3><a href="/transfers">View All →</a></div>
         <div class="tx-list">
@@ -186,8 +184,14 @@
           <div class="balance-label" style="color: rgba(255,255,255,0.8);"><%= account.hisa_tier === 'Premium' ? 'Premium Savings' : 'Savings (HISA)' %></div>
           <div class="balance-amount" style="color: white; font-size: 36px; margin-bottom: 12px;">€<%= hisaBalance.toLocaleString('en-US', {minimumFractionDigits: 2}) %></div>
           
-          <div style="display: inline-block; background: rgba(255, 255, 255, 0.25); padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; color: white;">
-            Current Yield: <%= account.hisa_tier === 'Premium' ? '12.5%' : '9.5%' %> APY
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+            <div style="background: rgba(255, 255, 255, 0.25); padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; color: white;">
+              Yield: <%= account.hisa_tier === 'Premium' ? '12.5%' : '9.5%' %> APY
+            </div>
+            
+            <a href="/hisa" style="background: white; color: <%= account.hisa_tier === 'Premium' ? '#d97706' : '#059669' %>; text-decoration: none; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 800; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+              Transfer ⇄
+            </a>
           </div>
 
         </div>
