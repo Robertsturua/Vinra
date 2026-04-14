@@ -140,10 +140,10 @@
 
   <main class="main-content">
     <div class="topbar">
-      <div class="greeting"><h1>Overview</h1><p>Here is what's happening with your money today.</p></div>
+      <div class="greeting">
+        <h1>Welcome back, <%= account.name %></h1>
+      </div>
     </div>
-    <div class="dashboard-grid">
-      <div>
         <div class="card balance-card" style="margin-bottom: 24px;">
           <div class="balance-label">Total EUR Balance</div>
           <div class="balance-amount">€<%= fiatBalance.toLocaleString('en-US', {minimumFractionDigits: 2}) %></div>

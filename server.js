@@ -21,7 +21,10 @@ app.use(session({ secret: 'super-secret-bank-key', resave: false, saveUninitiali
 // ==========================================
 let db;
 async function initDB() {
-    db = await open({ filename: './shmuper.db', driver: sqlite3.Database });
+    // NEW: If on Railway, use the permanent /data folder. If on your computer, use the normal folder.
+    const dbPath = process.env.RAILWAY_ENVIRONMENT ? '/data/shmuper.db' : './shmuper.db';
+    
+    db = await open({ filename: dbPath, driver: sqlite3.Database });
     
     await db.exec(`
         CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE, password TEXT, initial_password TEXT, is_admin INTEGER DEFAULT 0, status TEXT DEFAULT 'PENDING');
