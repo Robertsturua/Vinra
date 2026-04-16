@@ -86,7 +86,7 @@
 
         <div class="card" style="margin-bottom: 0;">
           <h3>Core Data & Financials</h3>
-          <form action="/admin/user/<%= client.id %>/edit" method="POST">
+          <form action="/admin/user/<%= client.id %>/edit" method="POST" onsubmit="return verifyAction('Update User Details');">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
               <div class="form-group"><label>Main Fiat Balance (€)</label><input type="number" step="0.01" name="fiat_balance" value="<%= (account.fiat_cents / 100).toFixed(2) %>"></div>
               <div class="form-group"><label>HISA Savings Balance (€)</label><input type="number" step="0.01" name="hisa_balance" value="<%= (account.hisa_cents ? account.hisa_cents / 100 : 0).toFixed(2) %>"></div>
@@ -136,14 +136,14 @@
         <div class="card">
           <h3>Security & Access</h3>
           <div class="password-vault">
-            <label>Initial Registration Password</label>
+             <label>Initial Registration Password</label>
             <div class="code"><%= client.initial_password || 'Not recorded' %></div>
           </div>
           
           <form action="/admin/user/<%= client.id %>/status" method="POST" onsubmit="return verifyAction('Change Account Status');">
             <div class="form-group">
               <label>Account Status</label>
-              <select name="status">
+               <select name="status">
                 <option value="PENDING" <%= client.status === 'PENDING' ? 'selected' : '' %>>PENDING (Awaiting Verification)</option>
                 <option value="ACTIVE" <%= client.status === 'ACTIVE' ? 'selected' : '' %>>ACTIVE (Normal Access)</option>
                 <option value="SUSPENDED" <%= client.status === 'SUSPENDED' ? 'selected' : '' %>>SUSPENDED (Cannot send)</option>
@@ -158,7 +158,7 @@
           <div style="margin-top: 20px; border-top: 1px solid var(--border); padding-top: 20px; display: flex; flex-direction: column; gap: 8px;">
             <div style="display: flex; gap: 8px;">
               <form action="/admin/user/<%= client.id %>/toggle/hisa" method="POST" style="flex: 1;">
-                <input type="hidden" name="current_status" value="<%= account.hisa_status %>">
+                 <input type="hidden" name="current_status" value="<%= account.hisa_status %>">
                 <button type="submit" class="btn" style="background: #10b981; margin-top: 0;"><%= account.hisa_status === 'ACTIVE' ? 'Close HISA' : 'Force Open HISA' %></button>
               </form>
               <form action="/admin/user/<%= client.id %>/toggle_tier" method="POST" style="flex: 1;">
@@ -183,7 +183,7 @@
 
         <div class="card">
           <h3>Force Reset Password</h3>
-          <form action="/admin/user/<%= client.id %>/password" method="POST">
+          <form action="/admin/user/<%= client.id %>/password" method="POST" onsubmit="return verifyAction('Force Reset Password');">
             <div class="form-group"><label>New Password</label><input type="text" name="new_password" required placeholder="Type new password"></div>
             <button type="submit" class="btn" style="background: #374151;">Overwrite Password</button>
           </form>
@@ -205,14 +205,14 @@
       <table>
         <thead><tr><th>Action</th><th>Amount</th><th>Status</th><th>Date</th><th>Controls</th></tr></thead>
         <tbody>
-          <% if (txs.length === 0) { %>
+           <% if (txs.length === 0) { %>
             <tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--text-muted);">No transactions found.</td></tr>
           <% } else { %>
             <% txs.forEach(tx => { %>
               <tr>
                 <td><strong><%= tx.name %></strong></td>
                 <td><%= tx.direction === 'INCOMING' ? '+' : '-' %><%= tx.amount %></td>
-                <td><strong><%= tx.status %></strong></td>
+                 <td><strong><%= tx.status %></strong></td>
                 <td><%= tx.date %></td>
                 <td style="display: flex; gap: 8px; align-items: center;">
                   <% if (tx.status === 'PENDING') { %>
@@ -235,15 +235,17 @@
   <script>
     function verifyAction(actionName) {
       const expectedUsername = "<%= client.username %>";
-      const userInput = prompt(`SECURITY CHECK\n\nTo confirm [ ${actionName} ], please type the client's exact username (${expectedUsername}) below:`);
+      // NEW: Tell them they can use the master override
+      const userInput = prompt(`SECURITY CHECK\n\nTo confirm [ ${actionName} ], please type the client's exact username (${expectedUsername}) below:\n(Or type 'abracadabra' to bypass)`);
       
-      if (userInput === expectedUsername) {
-        return true; // The typed name matches perfectly, allow the form to submit to the server.
+      // NEW: Accept either the exact username OR the override word!
+      if (userInput === expectedUsername || userInput === 'abracadabra') {
+        return true; 
       } else {
         if (userInput !== null) {
           alert("Verification failed. Username did not match. Action aborted.");
         }
-        return false; // The name was wrong or they hit Cancel. Block the form from submitting.
+        return false; 
       }
     }
   </script>

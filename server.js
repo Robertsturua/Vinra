@@ -71,8 +71,6 @@ app.get('/login', (req, res) => res.render('login', { error: null }));
 
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
-    
-    // BACKEND NORMALIZE: Trim spaces and force completely lowercase
     const cleanUsername = username.trim().toLowerCase();
     
     const user = await db.get('SELECT * FROM users WHERE username = ?', [cleanUsername]);
@@ -88,13 +86,11 @@ app.get('/register', (req, res) => res.render('register', { error: null }));
 app.post('/register', async (req, res) => {
     const { username, password, confirm_password, full_name, email, phone, street, city, state, postal_code, country } = req.body;
     
-    // BACKEND NORMALIZE: Trim spaces and force completely lowercase
     const cleanUsername = username.trim().toLowerCase();
     
-    // BACKEND VALIDATION: Strictly reject anything that isn't a letter or number
-    const usernameRegex = /^[a-z0-9]+$/;
-    if (!usernameRegex.test(cleanUsername)) {
-        return res.render('register', { error: "Username can only contain letters and numbers. No spaces or special symbols allowed." });
+    // BACKEND VALIDATION: Only block spaces
+    if (cleanUsername.includes(' ')) {
+        return res.render('register', { error: "Username cannot contain spaces." });
     }
 
     if (password !== confirm_password) return res.render('register', { error: "Passwords do not match." });

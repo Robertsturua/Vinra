@@ -119,7 +119,7 @@
           <div class="form-step active" id="step1">
             <div class="form-grid">
               <div class="input-group full-width"><label>Choose a Username</label>
-                <input id="username" name="username" type="text" pattern="[a-zA-Z0-9]+" title="Letters and numbers only. No spaces or special characters." required />
+                <input id="username" name="username" type="text" pattern="^\S+$" title="No spaces allowed." required />
               </div>
               <div class="input-group"><label>Create Password</label><input id="password" name="password" type="password" required /></div>
               <div class="input-group"><label>Confirm Password</label><input id="confirm_password" name="confirm_password" type="password" required /></div>
@@ -159,9 +159,8 @@
       const u=document.getElementById('username').value.trim(), p=document.getElementById('password').value, c=document.getElementById('confirm_password').value;
       if (!u || !p || !c) return showError("Please fill out all fields.");
       
-      // NEW FRONTEND VALIDATION: Instantly reject spaces or special symbols
-      const usernameRegex = /^[a-zA-Z0-9]+$/;
-      if (!usernameRegex.test(u)) return showError("Username can only contain letters and numbers (no spaces or special symbols).");
+      // ONLY BLOCK SPACES NOW
+      if (u.includes(' ')) return showError("Username cannot contain spaces.");
       
       if (p !== c) return showError("Passwords do not match.");
       if (p.length < 6) return showError("Password must be at least 6 characters.");
