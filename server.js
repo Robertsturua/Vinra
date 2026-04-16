@@ -21,7 +21,6 @@ app.use(session({ secret: 'super-secret-bank-key', resave: false, saveUninitiali
 // ==========================================
 let db;
 async function initDB() {
-    // If on Railway, use the permanent /data folder. If on your computer, use the normal folder.
     const dbPath = process.env.RAILWAY_ENVIRONMENT ? '/data/shmuper.db' : './shmuper.db';
     
     db = await open({ filename: dbPath, driver: sqlite3.Database });
@@ -72,7 +71,11 @@ app.get('/login', (req, res) => res.render('login', { error: null }));
 
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
-    const user = await db.get('SELECT * FROM users WHERE username = ?', [username.toLowerCase()]);
+    
+    // BACKEND NORMALIZE: Trim spaces and force completely lowercase
+    const cleanUsername = username.trim().toLowerCase();
+    
+    const user = await db.get('SELECT * FROM users WHERE username = ?', [cleanUsername]);
     if (user && await bcrypt.compare(password, user.password)) {
         if (user.status === 'LOCKED' && user.is_admin !== 1) return res.render('login', { error: `Account is LOCKED. Please contact support.` });
         req.session.userId = user.id;
@@ -84,17 +87,26 @@ app.post('/login', async (req, res) => {
 app.get('/register', (req, res) => res.render('register', { error: null }));
 app.post('/register', async (req, res) => {
     const { username, password, confirm_password, full_name, email, phone, street, city, state, postal_code, country } = req.body;
+    
+    // BACKEND NORMALIZE: Trim spaces and force completely lowercase
+    const cleanUsername = username.trim().toLowerCase();
+    
+    // BACKEND VALIDATION: Strictly reject anything that isn't a letter or number
+    const usernameRegex = /^[a-z0-9]+$/;
+    if (!usernameRegex.test(cleanUsername)) {
+        return res.render('register', { error: "Username can only contain letters and numbers. No spaces or special symbols allowed." });
+    }
+
     if (password !== confirm_password) return res.render('register', { error: "Passwords do not match." });
-    const existing = await db.get('SELECT * FROM users WHERE username = ?', [username.toLowerCase()]);
+    const existing = await db.get('SELECT * FROM users WHERE username = ?', [cleanUsername]);
     if (existing) return res.render('register', { error: "Username already taken." });
     
     const hash = await bcrypt.hash(password, 10);
     try {
-        const result = await db.run('INSERT INTO users (username, password, initial_password, status) VALUES (?, ?, ?, ?)', [username.toLowerCase(), hash, password, 'PENDING']);
+        const result = await db.run('INSERT INTO users (username, password, initial_password, status) VALUES (?, ?, ?, ?)', [cleanUsername, hash, password, 'PENDING']);
         const newId = result.lastID;
         await db.run('INSERT INTO profiles (user_id, full_name, email, phone, street, city, state, postal_code, country) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', [newId, full_name, email, phone, street, city, state, postal_code, country]);
         
-        // BRANDING FIX: Venra Bank IBANs
         const iban = "VEN" + Math.floor(Math.random() * 100000000000);
         const btc_address = "bc1q" + crypto.randomBytes(20).toString('hex');
         const eth_address = "0x" + crypto.randomBytes(20).toString('hex');
@@ -216,7 +228,6 @@ app.post('/send', requireAuth, async (req, res) => {
     const today = new Date().toLocaleDateString();
     const numAmount = parseFloat(amount);
 
-    // FAIL FAST: Ensure they typed a real number
     if (isNaN(numAmount) || numAmount <= 0) {
         return res.redirect('/send?error=Please enter a valid amount.');
     }
@@ -232,31 +243,20 @@ app.post('/send', requireAuth, async (req, res) => {
 
     if (currency_type === 'btc' && account.btc_status === 'ACTIVE') {
         const sats = Math.round(numAmount * 100000000);
-        
-        // FAIL FAST: Insufficient BTC
         if (account.btc_sats < sats) return res.redirect('/send?error=Insufficient Bitcoin balance for this transfer.');
-        
         await db.run('UPDATE accounts SET btc_sats = btc_sats - ? WHERE user_id = ?', [sats, userId]);
         await db.run('INSERT INTO transactions (user_id, name, direction, currency, amount, raw_amount, status, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [userId, 'Network Transfer', 'OUTGOING', 'BTC', `${numAmount} BTC`, numAmount, 'PENDING', today]);
         
     } else if (currency_type === 'eth' && account.eth_status === 'ACTIVE') {
         const sats = Math.round(numAmount * 100000000);
-        
-        // FAIL FAST: Insufficient ETH
         if (account.eth_sats < sats) return res.redirect('/send?error=Insufficient Ethereum balance for this transfer.');
-        
         await db.run('UPDATE accounts SET eth_sats = eth_sats - ? WHERE user_id = ?', [sats, userId]);
         await db.run('INSERT INTO transactions (user_id, name, direction, currency, amount, raw_amount, status, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [userId, 'Network Transfer', 'OUTGOING', 'ETH', `${numAmount} ETH`, numAmount, 'PENDING', today]);
         
     } else if (currency_type === 'eur') {
         const cents = Math.round(numAmount * 100);
-        
-        // FAIL FAST: Insufficient EUR
         if (account.fiat_cents < cents) return res.redirect('/send?error=Insufficient EUR balance for this transfer.');
-        
-        // FAIL FAST: Daily Limit
         if ((sentToday + numAmount) > dailyLimit) return res.redirect(`/send?error=Daily transfer limit of €${dailyLimit.toLocaleString()} exceeded. Please request a tier upgrade.`);
-        
         await db.run('UPDATE accounts SET fiat_cents = fiat_cents - ? WHERE user_id = ?', [cents, userId]);
         await db.run('INSERT INTO transactions (user_id, name, direction, currency, amount, raw_amount, status, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [userId, recipient_name || 'Bank Transfer', 'OUTGOING', 'EUR', `${numAmount.toLocaleString('en-US', {minimumFractionDigits: 2})} EUR`, numAmount, 'PENDING', today]);
     }

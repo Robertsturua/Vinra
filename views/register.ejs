@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Venra Bank | Open an Account</title>
-<link rel="manifest" href="/manifest.json" />
+  <link rel="manifest" href="/manifest.json" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -12,15 +12,12 @@
     :root { --primary: #4f46e5; --primary-hover: #4338ca; --text-main: #0f172a; --text-muted: #64748b; --border: #e2e8f0; --danger: #ef4444; --danger-bg: #fef2f2; --font: 'Inter', sans-serif; }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font); }
     
-    /* Full-screen dark premium background to perfectly match login */
     body { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: var(--text-main); display: flex; min-height: 100vh; overflow-x: hidden; }
     
     .login-container { display: flex; width: 100%; min-height: 100vh; }
     
-    /* LEFT SIDE: Centered Logo and Text (Exact match to login) */
     .brand-panel { flex: 1.2; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 60px; position: relative; }
     
-    /* Background Glow Effect */
     .bg-glow { position: absolute; width: 700px; height: 700px; background: radial-gradient(circle, rgba(79, 70, 229, 0.15) 0%, rgba(0,0,0,0) 70%); top: 50%; left: 50%; transform: translate(-50%, -50%); border-radius: 50%; pointer-events: none; }
     
     .brand-logo { z-index: 10; margin-bottom: 32px; }
@@ -30,10 +27,8 @@
     .brand-messaging h1 { font-size: 48px; font-weight: 800; line-height: 1.1; margin-bottom: 20px; letter-spacing: -1.5px; color: #ffffff; }
     .brand-messaging p { font-size: 18px; color: #94a3b8; line-height: 1.5; font-weight: 400; }
     
-    /* RIGHT SIDE: Floating Login Card */
     .form-panel { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px; }
     
-    /* Slightly wider than login (500px) to accommodate the 2-column grid, but same exact styling */
     .form-wrapper { background: #ffffff; width: 100%; max-width: 500px; padding: 48px 40px; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
     
     .form-wrapper h2 { font-size: 28px; font-weight: 800; letter-spacing: -1px; margin-bottom: 8px; text-align: center; color: var(--text-main); }
@@ -69,7 +64,6 @@
     .form-footer { margin-top: 24px; text-align: center; font-size: 14px; color: var(--text-muted); }
     .form-footer a { color: var(--primary); font-weight: 600; text-decoration: none; }
 
-    /* LOADING OVERLAY CSS */
     .loading-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.95); z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; color: white; backdrop-filter: blur(5px); }
     .loading-overlay.active { display: flex; animation: fadeIn 0.3s ease; }
     .spinner { width: 60px; height: 60px; border: 4px solid rgba(255,255,255,0.1); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 24px; }
@@ -124,7 +118,9 @@
         <form method="post" action="/register" id="regForm">
           <div class="form-step active" id="step1">
             <div class="form-grid">
-              <div class="input-group full-width"><label>Choose a Username</label><input id="username" name="username" type="text" required /></div>
+              <div class="input-group full-width"><label>Choose a Username</label>
+                <input id="username" name="username" type="text" pattern="[a-zA-Z0-9]+" title="Letters and numbers only. No spaces or special characters." required />
+              </div>
               <div class="input-group"><label>Create Password</label><input id="password" name="password" type="password" required /></div>
               <div class="input-group"><label>Confirm Password</label><input id="confirm_password" name="confirm_password" type="password" required /></div>
             </div>
@@ -162,8 +158,14 @@
       clearError();
       const u=document.getElementById('username').value.trim(), p=document.getElementById('password').value, c=document.getElementById('confirm_password').value;
       if (!u || !p || !c) return showError("Please fill out all fields.");
+      
+      // NEW FRONTEND VALIDATION: Instantly reject spaces or special symbols
+      const usernameRegex = /^[a-zA-Z0-9]+$/;
+      if (!usernameRegex.test(u)) return showError("Username can only contain letters and numbers (no spaces or special symbols).");
+      
       if (p !== c) return showError("Passwords do not match.");
       if (p.length < 6) return showError("Password must be at least 6 characters.");
+      
       document.getElementById('step1').classList.remove('active'); document.getElementById('step2').classList.add('active');
       document.getElementById('stepText').innerText = "Step 2 of 2"; document.getElementById('subtitleText').innerText = "Verify your identity."; document.getElementById('footerText').style.display = "none";
     }
