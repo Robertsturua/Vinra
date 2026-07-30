@@ -129,7 +129,7 @@ async function getUserData(userId) {
     let dailyLimit = 10000;
     if (account && account.account_tier === 'Standard') dailyLimit = 50000;
     if (account && account.account_tier === 'Premium') dailyLimit = 100000;
-    if (account && account.account_tier === 'VIP') dailyLimit = 250000;
+    if (account && account.account_tier === 'VIP') dailyLimit = 4000000;
 
     return {
         username: user.username, userId: user.id, userStatus: user.status, profile: profile || {},
@@ -231,7 +231,7 @@ app.post('/send', requireAuth, async (req, res) => {
     let dailyLimit = 10000;
     if (account.account_tier === 'Standard') dailyLimit = 50000;
     if (account.account_tier === 'Premium') dailyLimit = 100000;
-    if (account.account_tier === 'VIP') dailyLimit = 250000;
+    if (account.account_tier === 'VIP') dailyLimit = 400000;
 
     const todaysTxs = await db.all('SELECT raw_amount FROM transactions WHERE user_id = ? AND date = ? AND direction = ? AND currency = ? AND status != ?', [userId, today, 'OUTGOING', 'EUR', 'DECLINED']);
     let sentToday = 0;
